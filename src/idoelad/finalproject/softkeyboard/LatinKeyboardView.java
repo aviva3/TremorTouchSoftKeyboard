@@ -2,6 +2,7 @@ package idoelad.finalproject.softkeyboard;
 
 
 import idoelad.finalproject.core.bigtouch.BigTouch;
+import idoelad.finalproject.core.deviationtouch.DeviationTouch;
 import idoelad.finalproject.core.multitouch.MultiTouch;
 import idoelad.finalproject.core.touch.Circle;
 import idoelad.finalproject.core.touch.Point;
@@ -36,12 +37,10 @@ public class LatinKeyboardView extends KeyboardView {
 
     public LatinKeyboardView(Context context, AttributeSet attrs) {
     	super(context, attrs);
-    	loadInitUserParams();
     }
 
     public LatinKeyboardView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-    	loadInitUserParams();
     }
 
     void setSubtypeOnSpaceKey(final InputMethodSubtype subtype) {
@@ -54,13 +53,15 @@ public class LatinKeyboardView extends KeyboardView {
     
     /////// CORE ///////
     
-	private void loadInitUserParams() {
+	public static void loadInitUserParams() {
 		try {
-			UserParamsHandler.initUserParamsFiles(new File("/storage/emulated/0/TremorTouchLauncher/userParams"));
+			UserParamsHandler.initUserParamsFiles();
 			UserParamsHolder.upBig = UserParamsHandler.loadUserParamsBig();
 			UserParamsHolder.upMulti = UserParamsHandler.loadUserParamsMulti();
+			UserParamsHolder.upDev = UserParamsHandler.loadUserParamsDev();
+			Log.i("@@@","LOADED upDev.getXDev: "+UserParamsHolder.upDev.getxDev());
 		} catch (IOException e) {
-			Log.e("@@@", "Error while loading user parameters: "+e.getMessage());
+			Log.e(LOG_TAG, "Error while loading user parameters: "+e.getMessage());
 		}
 		
 	}
@@ -116,6 +117,8 @@ public class LatinKeyboardView extends KeyboardView {
 		int pointerId = MultiTouch.guessFingure(currTouches, UserParamsHolder.upMulti);
 		ArrayList<Touch> filteredTouches = MultiTouch.filterTouchesByFinger(currTouches, pointerId);
 		Circle circle = BigTouch.guessCircleBigTouch(filteredTouches, UserParamsHolder.upBig);
+		double[] newLocation = DeviationTouch.getNewLocation(circle.getCenter().getX(), circle.getCenter().getY(), UserParamsHolder.upDev);
+		circle.setCenter(new Point(newLocation[0], newLocation[1]));
 		simulateAction((float)circle.getCenter().getX(),(float)circle.getCenter().getY(), MotionEvent.ACTION_DOWN); //FIXME casting
 		return circle;
 	}

@@ -258,6 +258,7 @@ public class SoftKeyboard extends InputMethodService
     
     @Override public void onStartInputView(EditorInfo attribute, boolean restarting) {
         super.onStartInputView(attribute, restarting);
+        LatinKeyboardView.loadInitUserParams();
         // Apply the selected keyboard to the input view.
         setLatinKeyboard(mCurKeyboard);
         mInputView.closing();
